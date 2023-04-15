@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15.0
+    ports:
+      - "5441:5432"
+    volumes:      
+      - postgres-data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: admin_db
+      POSTGRES_USER_NEW: keycloak_db_user
+      POSTGRES_PASSWORD_NEW: keycloak_db_password
+      POSTGRES_DB_NEW: keycloak_db
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:19.0.3
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: keycloak_db
+      DB_USER: keycloak_db_user
+      DB_PASSWORD: keycloak_db_password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8091:8080
+    depends_on:
+      - db
+    command:
+      - start-dev
+
+volumes:
+  postgres-data:
